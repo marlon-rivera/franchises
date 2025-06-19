@@ -1,6 +1,8 @@
 package co.com.nequi.franchising.api.config;
 
+import co.com.nequi.franchising.api.handler.BranchHandler;
 import co.com.nequi.franchising.api.handler.FranchiseHandler;
+import co.com.nequi.franchising.api.router.BranchRouterRest;
 import co.com.nequi.franchising.api.router.FranchiseRouterRest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class, FranchiseRepositoryTestConfig.class})
+@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class, RepositoryTestConfig.class, BranchRouterRest.class, BranchHandler.class})
 @WebFluxTest
 @Import({CorsConfig.class, SecurityHeadersConfig.class, UseCaseConfig.class})
 class ConfigTest {
