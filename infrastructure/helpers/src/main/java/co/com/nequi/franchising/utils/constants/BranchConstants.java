@@ -6,4 +6,7 @@ public class BranchConstants {
     public static final String ENDPOINT_CREATE_BRANCH = "/api/branch/create";
     public static final String ERROR_BRANCH_FRANCHISE_ID_NOT_VALID = "Branch franchise ID must not be null";
 
+    private BranchConstants() {
+    }
+
 }

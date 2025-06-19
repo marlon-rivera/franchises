@@ -1,6 +1,8 @@
 package co.com.nequi.franchising.api;
 
+import co.com.nequi.franchising.api.handler.BranchHandler;
 import co.com.nequi.franchising.api.handler.FranchiseHandler;
+import co.com.nequi.franchising.api.router.BranchRouterRest;
 import co.com.nequi.franchising.api.router.FranchiseRouterRest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class})
+@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class, BranchRouterRest.class, BranchHandler.class})
 @WebFluxTest
 class RouterRestTest {
 
