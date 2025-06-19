@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class})
+@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class, FranchiseRepositoryTestConfig.class})
 @WebFluxTest
 @Import({CorsConfig.class, SecurityHeadersConfig.class, UseCaseConfig.class})
 class ConfigTest {
@@ -19,12 +19,13 @@ class ConfigTest {
 
     @Test
     void corsConfigurationShouldAllowOrigins() {
-        webTestClient.get()
-                .uri("/api/usecase/path")
+        webTestClient.post()
+                .uri("/api/franchise/create")
+                .bodyValue("{\"name\":\"Test Franchise\"}")
+                .header("Content-Type", "application/json")
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Security-Policy",
-                        "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
+                .expectStatus().isOk() // O ajusta si esperas otro status
+                .expectHeader().valueEquals("Content-Security-Policy", "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
                 .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
                 .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")
                 .expectHeader().valueEquals("Server", "")

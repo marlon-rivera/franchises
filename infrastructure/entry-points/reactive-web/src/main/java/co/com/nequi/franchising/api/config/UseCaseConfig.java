@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class UseCaseConfig {
 
-
     @Bean
     public FranchiseUseCase franchiseUseCase(FranchiseRepository franchiseRepository) {
         return new FranchiseUseCase(franchiseRepository);
