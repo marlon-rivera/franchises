@@ -1,5 +1,6 @@
 package co.com.nequi.franchising.config;
 
+import co.com.nequi.franchising.model.branch.gateways.BranchRepository;
 import co.com.nequi.franchising.model.franchise.gateways.FranchiseRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -37,6 +38,14 @@ public class UseCasesConfigTest {
         @Bean
         public FranchiseRepository franchiseRepository() {
             FranchiseRepository mock = Mockito.mock(FranchiseRepository.class);
+            Mockito.when(mock.save(Mockito.any()))
+                    .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+            return mock;
+        }
+
+        @Bean
+        public BranchRepository branchRepository() {
+            BranchRepository mock = Mockito.mock(BranchRepository.class);
             Mockito.when(mock.save(Mockito.any()))
                     .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
             return mock;

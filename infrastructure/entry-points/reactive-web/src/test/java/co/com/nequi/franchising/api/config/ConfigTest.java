@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class, FranchiseRepositoryTestConfig.class})
+@ContextConfiguration(classes = {FranchiseRouterRest.class, FranchiseHandler.class, RepositoryTestConfig.class})
 @WebFluxTest
 @Import({CorsConfig.class, SecurityHeadersConfig.class, UseCaseConfig.class})
 class ConfigTest {
