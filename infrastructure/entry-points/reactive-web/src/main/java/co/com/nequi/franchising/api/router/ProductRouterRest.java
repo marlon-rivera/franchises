@@ -137,7 +137,8 @@ public class ProductRouterRest {
         return route(
                 POST(ProductConstants.ENDPOINT_CREATE_PRODUCT), handler::saveProduct)
                 .andRoute(DELETE(ProductConstants.ENDPOINT_DELETE_PRODUCT_FROM_BRANCH), handler::deleteProductFromBranch)
-                .andRoute(PUT(ProductConstants.ENDPOINT_UPDATE_STOCK), handler::updateStockProduct);
+                .andRoute(PUT(ProductConstants.ENDPOINT_UPDATE_STOCK), handler::updateStockProduct)
+                .andRoute(PUT(ProductConstants.ENDPOINT_UPDATE_NAME), handler::updateProductName);
     }
 
 }

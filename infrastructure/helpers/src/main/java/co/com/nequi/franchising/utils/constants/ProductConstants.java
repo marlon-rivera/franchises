@@ -10,6 +10,7 @@ public class ProductConstants {
     public static final String ENDPOINT_CREATE_PRODUCT = "/api/product/create";
     public static final String ENDPOINT_DELETE_PRODUCT_FROM_BRANCH = "/api/product/delete/product/{productId}/branch/{branchId}";
     public static final String ENDPOINT_UPDATE_STOCK = "/api/product/update/stock";
+    public static final String ENDPOINT_UPDATE_NAME = "/api/product/{productId}/update-name";
     public static final String PATH_VARIABLE_PRODUCT_ID = "productId";
     public static final String PATH_VARIABLE_BRANCH_ID = "branchId";
 
