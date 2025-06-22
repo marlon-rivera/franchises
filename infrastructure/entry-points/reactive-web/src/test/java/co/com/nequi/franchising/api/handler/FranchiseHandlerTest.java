@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ class FranchiseHandlerTest {
         webTestClient = WebTestClient.bindToRouterFunction(
                 route().POST("/api/franchise/create", handler::saveFranchise).build()
                         .andRoute(GET("/api/franchise/{franchiseId}/top-products"), handler::getTopStockProductsByBranch)
+                        .andRoute(PUT("/api/franchise/{franchiseId}/update-name"), handler::updateFranchiseName)
         ).build();
     }
 
@@ -169,5 +171,72 @@ class FranchiseHandlerTest {
                 .jsonPath("$.message").value(msg -> ((String) msg).contains("Internal error"));
     }
 
+    @Test
+    void shouldUpdateFranchiseName() {
+        Long franchiseId = 1L;
+        String newName = "Updated Franchise";
+
+        when(franchiseUseCase.updateName(franchiseId, newName)).thenReturn(Mono.just(new Franchise(franchiseId, newName)));
+
+        webTestClient.put()
+                .uri("/api/franchise/{franchiseId}/update-name", franchiseId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new FranchiseRequestDto(newName))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(FranchiseResponseDto.class)
+                .value(response -> {
+                    assertEquals(franchiseId, response.id());
+                    assertEquals(newName, response.name());
+                });
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdatingFranchiseNameWithEmptyName() {
+        Long franchiseId = 1L;
+
+        webTestClient.put()
+                .uri("/api/franchise/{franchiseId}/update-name", franchiseId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new FranchiseRequestDto(""))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.message").value(msg ->
+                        ((String) msg).contains("franchise name must not be null or empty"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdatingFranchiseNameWithNullName() {
+        Long franchiseId = 1L;
+
+        webTestClient.put()
+                .uri("/api/franchise/{franchiseId}/update-name", franchiseId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new FranchiseRequestDto(null))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.message").value(msg ->
+                        ((String) msg).contains("franchise name must not be null or empty"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdatingFranchiseNameWithNonNumericId() {
+        String invalidFranchiseId = "abc";
+
+        webTestClient.put()
+                .uri("/api/franchise/{franchiseId}/update-name", invalidFranchiseId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new FranchiseRequestDto("New Name"))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.message").value(msg ->
+                        ((String) msg).contains("The franchise ID must be numeric."));
+    }
 
 }

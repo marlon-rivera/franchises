@@ -165,4 +165,62 @@ class FranchiseUseCaseTest {
                 .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals(FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + franchiseId))
                 .verify();
     }
+
+    @Test
+    void shouldUpdateFranchiseNameSuccessfully() {
+        Long franchiseId = 1L;
+        String newName = "Updated Franchise";
+
+        Franchise existingFranchise = Franchise.builder()
+                .id(franchiseId)
+                .name("Old Name")
+                .build();
+
+        Franchise updatedFranchise = Franchise.builder()
+                .id(franchiseId)
+                .name(newName)
+                .build();
+
+        when(franchiseRepository.findById(franchiseId))
+                .thenReturn(Mono.just(existingFranchise));
+
+        when(franchiseRepository.save(existingFranchise))
+                .thenReturn(Mono.just(updatedFranchise));
+        StepVerifier.create(franchiseUseCase.updateName(franchiseId, newName))
+                .expectNext(updatedFranchise)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdatingFranchiseNameWithNullOrEmpty() {
+        Long franchiseId = 1L;
+        String newName = "";
+
+        StepVerifier.create(franchiseUseCase.updateName(franchiseId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdatingFranchiseNameWithNull() {
+        Long franchiseId = 1L;
+        String newName = null;
+
+        StepVerifier.create(franchiseUseCase.updateName(franchiseId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorWhenFranchiseDoesNotExistForUpdate() {
+        Long franchiseId = 999L;
+        String newName = "Updated Franchise";
+
+        when(franchiseRepository.findById(franchiseId))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(franchiseUseCase.updateName(franchiseId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals(FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + franchiseId))
+                .verify();
+    }
 }
