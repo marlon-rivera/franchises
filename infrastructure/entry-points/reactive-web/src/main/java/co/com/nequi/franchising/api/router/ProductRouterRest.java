@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
@@ -19,7 +20,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class ProductRouterRest {
 
-    @RouterOperations(
+    @RouterOperations({
             @RouterOperation(
                     path = ProductConstants.ENDPOINT_CREATE_PRODUCT,
                     method = POST,
@@ -43,7 +44,31 @@ public class ProductRouterRest {
                                     )
                             }
                     )
-            )
+            ),
+            @RouterOperation(
+                    path = ProductConstants.ENDPOINT_DELETE_PRODUCT_FROM_BRANCH,
+                    method = DELETE,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "deleteProductFromBranch",
+                    operation = @Operation(
+                            summary = "Delete Product from Branch",
+                            operationId = "deleteProductFromBranch",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Product deleted successfully"
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Invalid product or branch ID"
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error"
+                                    )
+                            }
+                    )
+            )}
     )
     @Bean
     public RouterFunction<ServerResponse> productRoutes(ProductHandler handler) {
