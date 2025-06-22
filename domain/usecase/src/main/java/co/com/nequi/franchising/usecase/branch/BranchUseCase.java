@@ -3,6 +3,7 @@ package co.com.nequi.franchising.usecase.branch;
 import co.com.nequi.franchising.model.branch.Branch;
 import co.com.nequi.franchising.model.branch.gateways.BranchRepository;
 import co.com.nequi.franchising.model.exceptions.BranchCreationException;
+import co.com.nequi.franchising.model.exceptions.BranchNotExistException;
 import co.com.nequi.franchising.model.exceptions.FranchiseNotExistException;
 import co.com.nequi.franchising.model.franchise.gateways.FranchiseRepository;
 import co.com.nequi.franchising.usecase.utils.BranchMessagesConstants;
@@ -33,8 +34,8 @@ public class BranchUseCase {
             return Mono.error(new BranchCreationException(BranchMessagesConstants.ERROR_BRANCH_NAME_NOT_NULL_OR_EMPTY));
         }
         return branchRepository.findById(branchId)
-                .switchIfEmpty(Mono.error(new FranchiseNotExistException(
-                        FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + branchId
+                .switchIfEmpty(Mono.error(new BranchNotExistException(
+                        BranchMessagesConstants.ERROR_BRANCH_NOT_EXIST + branchId
                 )))
                 .flatMap(branch -> {
                     branch.setName(newName);

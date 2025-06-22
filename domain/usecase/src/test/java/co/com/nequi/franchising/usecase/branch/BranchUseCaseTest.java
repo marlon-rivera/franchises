@@ -82,4 +82,50 @@ class BranchUseCaseTest {
                 .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Franchise does not exist for ID: " + input.getFranchiseId()))
                 .verify();
     }
+
+    @Test
+    void shouldUpdateBranchNameSuccessfully() {
+        Long branchId = 1L;
+        String newName = "Updated Branch Name";
+        Branch existingBranch = Branch.builder().id(branchId).name("Old Name").franchiseId(1L).build();
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.just(existingBranch));
+        when(branchRepository.save(existingBranch)).thenReturn(Mono.just(existingBranch.toBuilder().name(newName).build()));
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, newName))
+                .expectNextMatches(updatedBranch -> updatedBranch.getId().equals(branchId) && updatedBranch.getName().equals(newName))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdatingBranchNameWithEmptyName() {
+        Long branchId = 1L;
+        String newName = "";
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Branch name must not be null or empty"))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdatingBranchNameWithNullName() {
+        Long branchId = 1L;
+        String newName = null;
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Branch name must not be null or empty"))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorWhenBranchDoesNotExistForUpdate() {
+        Long branchId = 999L;
+        String newName = "Updated Branch Name";
+
+        when(branchRepository.findById(branchId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(branchUseCase.updateBranchName(branchId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Branch does not exist for ID: " + branchId))
+                .verify();
+    }
 }
