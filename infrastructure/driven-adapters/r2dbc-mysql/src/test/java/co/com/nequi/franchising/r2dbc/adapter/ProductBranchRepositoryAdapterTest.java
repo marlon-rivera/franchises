@@ -81,4 +81,20 @@ class ProductBranchRepositoryAdapterTest {
         verify(repository).delete(data);
     }
 
+    @Test
+    void shouldFindTopByBranchIdOrderByStockDescSuccessfully() {
+        Long branchId = 1L;
+        BranchProduct productBranch = new BranchProduct(1L, branchId, 1L, 10);
+        BranchProductData data = new BranchProductData();
+
+        when(repository.findTopByBranchIdOrderByStockDesc(branchId)).thenReturn(Mono.just(data));
+        when(mapper.map(data, BranchProduct.class)).thenReturn(productBranch);
+
+        StepVerifier.create(adapter.findTopByBranchIdOrderByStockDesc(branchId))
+                .expectNext(productBranch)
+                .verifyComplete();
+
+        verify(repository).findTopByBranchIdOrderByStockDesc(branchId);
+    }
+
 }

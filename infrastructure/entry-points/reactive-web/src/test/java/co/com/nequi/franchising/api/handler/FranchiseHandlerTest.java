@@ -2,14 +2,21 @@ package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.FranchiseRequestDto;
 import co.com.nequi.franchising.api.dto.response.FranchiseResponseDto;
+import co.com.nequi.franchising.model.branch.Branch;
 import co.com.nequi.franchising.model.franchise.Franchise;
+import co.com.nequi.franchising.model.product.Product;
+import co.com.nequi.franchising.usecase.dto.TopProductByBranchDto;
 import co.com.nequi.franchising.usecase.franchise.FranchiseUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +34,7 @@ class FranchiseHandlerTest {
 
         webTestClient = WebTestClient.bindToRouterFunction(
                 route().POST("/api/franchise/create", handler::saveFranchise).build()
+                        .andRoute(GET("/api/franchise/{franchiseId}/top-products"), handler::getTopStockProductsByBranch)
         ).build();
     }
 
@@ -80,6 +88,85 @@ class FranchiseHandlerTest {
                 .jsonPath("$.status").isEqualTo(400)
                 .jsonPath("$.message").value(msg ->
                         ((String) msg).contains("franchise name must not be null or empty"));
+    }
+
+    @Test
+    void shouldGetTopStockProductsByBranch() {
+        Long franchiseId = 1L;
+
+        TopProductByBranchDto dto1 = new TopProductByBranchDto(
+                new Branch(1L, "Branch A", franchiseId),
+                new Product(1L, "Product A"),
+                10
+        );
+
+        TopProductByBranchDto dto2 = new TopProductByBranchDto(
+                new Branch(2L, "Branch B", franchiseId),
+                new Product(2L, "Product B"),
+                30
+        );
+
+        when(franchiseUseCase.getTopStockProductsByBranch(franchiseId))
+                .thenReturn(Flux.just(dto1, dto2));
+
+        webTestClient.get()
+                .uri("/api/franchise/{franchiseId}/top-products", franchiseId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("application/json")
+                .expectBodyList(TopProductByBranchDto.class)
+                .hasSize(2)
+                .value(list -> {
+                    assertEquals("Branch A", list.get(0).branch().getName());
+                    assertEquals("Product A", list.get(0).product().getName());
+                    assertEquals(10, list.get(0).stock());
+
+                    assertEquals("Branch B", list.get(1).branch().getName());
+                    assertEquals("Product B", list.get(1).product().getName());
+                    assertEquals(30, list.get(1).stock());
+                });
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenFranchiseIdIsNotNumeric() {
+        String invalidFranchiseId = "abc";
+
+        webTestClient.get()
+                .uri("/api/franchise/{franchiseId}/top-products", invalidFranchiseId)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.message").value(msg ->
+                        ((String) msg).contains("The franchise ID must be numeric."));
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoTopProductsFound() {
+        Long franchiseId = 1L;
+        when(franchiseUseCase.getTopStockProductsByBranch(franchiseId)).thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri("/api/franchise/{franchiseId}/top-products", franchiseId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(TopProductByBranchDto.class)
+                .hasSize(0);
+    }
+
+    @Test
+    void shouldReturnInternalServerErrorOnException() {
+        Long franchiseId = 1L;
+        when(franchiseUseCase.getTopStockProductsByBranch(franchiseId))
+                .thenReturn(Flux.error(new RuntimeException("Internal error")));
+
+        webTestClient.get()
+                .uri("/api/franchise/{franchiseId}/top-products", franchiseId)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(500)
+                .jsonPath("$.message").value(msg -> ((String) msg).contains("Internal error"));
     }
 
 
