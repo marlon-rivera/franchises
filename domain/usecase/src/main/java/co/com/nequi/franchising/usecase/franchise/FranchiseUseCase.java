@@ -4,6 +4,7 @@ import co.com.nequi.franchising.model.branch.gateways.BranchRepository;
 import co.com.nequi.franchising.model.branchproduct.gateways.BranchProductRepository;
 import co.com.nequi.franchising.model.exceptions.FranchiseCreationException;
 import co.com.nequi.franchising.model.exceptions.FranchiseNotExistException;
+import co.com.nequi.franchising.model.exceptions.InvalidDataException;
 import co.com.nequi.franchising.model.franchise.Franchise;
 import co.com.nequi.franchising.model.franchise.gateways.FranchiseRepository;
 
@@ -48,5 +49,19 @@ public class FranchiseUseCase {
                                 ));
 
 
+    }
+
+    public Mono<Franchise> updateName(Long franchiseId, String newName) {
+        if (newName == null || newName.isBlank()) {
+            return Mono.error(new InvalidDataException(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY));
+        }
+        return franchiseRepository.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new FranchiseNotExistException(
+                        FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + franchiseId
+                )))
+                .flatMap(franchise -> {
+                    franchise.setName(newName);
+                    return franchiseRepository.save(franchise);
+                });
     }
 }

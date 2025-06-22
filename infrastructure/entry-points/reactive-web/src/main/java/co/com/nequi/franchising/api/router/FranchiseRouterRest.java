@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -87,12 +86,40 @@ public class FranchiseRouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = FranchiseConstants.ENDPOINT_UPDATE_FRANCHISE_NAME,
+                    method = RequestMethod.PUT,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "updateFranchiseName",
+                    operation = @Operation(
+                            summary = "Update Franchise Name",
+                            operationId = "updateFranchiseName",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Franchise name updated successfully",
+                                            content = @Content(schema = @Schema(implementation = FranchiseResponseDto.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Franchise ID must be numeric or name must not be null or empty",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    )
+                            }
+                    )
             )
     })
     @Bean
     public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler) {
         return route(POST(FranchiseConstants.ENDPOINT_CREATE_FRANCHISE), handler::saveFranchise)
-                .andRoute(GET(FranchiseConstants.ENDPOINT_GET_TOP_PRODUCTS_BY_BRANCH), handler::getTopStockProductsByBranch);
+                .andRoute(GET(FranchiseConstants.ENDPOINT_GET_TOP_PRODUCTS_BY_BRANCH), handler::getTopStockProductsByBranch)
+                .andRoute(PUT(FranchiseConstants.ENDPOINT_UPDATE_FRANCHISE_NAME), handler::updateFranchiseName);
 
     }
 }
