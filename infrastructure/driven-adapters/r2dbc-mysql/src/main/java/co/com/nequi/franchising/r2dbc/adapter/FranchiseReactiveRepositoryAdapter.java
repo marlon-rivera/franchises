@@ -7,6 +7,7 @@ import co.com.nequi.franchising.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.nequi.franchising.r2dbc.repository.FranchiseReactiveRepository;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 @Repository
 public class FranchiseReactiveRepositoryAdapter extends ReactiveAdapterOperations<

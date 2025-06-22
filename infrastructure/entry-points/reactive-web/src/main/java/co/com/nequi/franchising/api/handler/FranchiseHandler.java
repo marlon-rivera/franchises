@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.FranchiseRequestDto;
+import co.com.nequi.franchising.api.dto.request.FranchiseUpdateNameDto;
 import co.com.nequi.franchising.api.dto.response.FranchiseResponseDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.model.franchise.Franchise;
@@ -75,5 +76,36 @@ public class FranchiseHandler {
                                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                 e.getMessage(),
                                 FranchiseConstants.ENDPOINT_GET_TOP_PRODUCTS_BY_BRANCH)));
+    }
+
+    public Mono<ServerResponse> updateFranchiseName(ServerRequest request) {
+        Long franchiseId;
+        try {
+            franchiseId = Long.valueOf(request.pathVariable(FranchiseConstants.PATH_VARIABLE_FRANCHISE_ID));
+        } catch (NumberFormatException e) {
+            ExceptionResponse errorResponse = new ExceptionResponse(
+                    LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST.value(),
+                    FranchiseConstants.ERROR_ID_MUST_BE_NUMERIC, FranchiseConstants.ENDPOINT_UPDATE_FRANCHISE_NAME);
+            return ServerResponse.badRequest().bodyValue(errorResponse);
+        }
+        return request.bodyToMono(FranchiseUpdateNameDto.class)
+                .flatMap(dto -> {
+                    if (dto.name() == null || dto.name().isBlank()) {
+                        ExceptionResponse errorResponse = new ExceptionResponse(
+                                LocalDateTime.now().toString(),
+                                HttpStatus.BAD_REQUEST.value(),
+                                FranchiseConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY,
+                                FranchiseConstants.ENDPOINT_UPDATE_FRANCHISE_NAME
+                        );
+                        return ServerResponse.badRequest()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(errorResponse);
+                    }
+
+                    return franchiseUseCase.updateName(franchiseId, dto.name())
+                            .flatMap(updated -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(new FranchiseResponseDto(updated.getId(), updated.getName())));
+                });
     }
 }
