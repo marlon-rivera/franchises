@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -46,7 +47,9 @@ public class ProductRouterRest {
     )
     @Bean
     public RouterFunction<ServerResponse> productRoutes(ProductHandler handler) {
-        return route(POST(ProductConstants.ENDPOINT_CREATE_PRODUCT), handler::saveProduct);
+        return route(
+                POST(ProductConstants.ENDPOINT_CREATE_PRODUCT), handler::saveProduct)
+                .andRoute(DELETE(ProductConstants.ENDPOINT_DELETE_PRODUCT_FROM_BRANCH), handler::deleteProductFromBranch);
     }
 
 }

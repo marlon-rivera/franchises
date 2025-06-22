@@ -61,7 +61,29 @@ public class ProductHandler {
             );
         }
         return null;
+    }
 
+    public Mono<ServerResponse> deleteProductFromBranch(ServerRequest request) {
+        return Mono.defer(() -> {
+            try {
+                Long productId = Long.valueOf(request.pathVariable(ProductConstants.PATH_VARIABLE_PRODUCT_ID));
+                Long branchId = Long.valueOf(request.pathVariable(ProductConstants.PATH_VARIABLE_BRANCH_ID));
+
+                return productUseCase.deleteProduct(productId, branchId)
+                        .then(ServerResponse.noContent().build());
+
+            } catch (NumberFormatException e) {
+                ExceptionResponse errorResponse = new ExceptionResponse(
+                        LocalDateTime.now().toString(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        ProductConstants.ERROR_PRODUCT_ID_OR_BRANCH_ID_NOT_VALID,
+                        ProductConstants.ENDPOINT_DELETE_PRODUCT_FROM_BRANCH
+                );
+                return ServerResponse.badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(errorResponse);
+            }
+        });
     }
 
 }
