@@ -129,6 +129,42 @@ public class ProductRouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = ProductConstants.ENDPOINT_UPDATE_NAME,
+                    method = PUT,
+                    beanClass = ProductHandler.class,
+                    beanMethod = "updateProductName",
+                    operation = @Operation(
+                            summary = "Update Product Name",
+                            operationId = "updateProductName",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Product name updated successfully",
+                                            content = @Content(
+                                                    mediaType = "application/json",
+                                                    schema = @Schema(implementation = Product.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Invalid product ID or name",
+                                            content = @Content(
+                                                    mediaType = "application/json",
+                                                    schema = @Schema(implementation = ExceptionResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error",
+                                            content = @Content(
+                                                    mediaType = "application/json",
+                                                    schema = @Schema(implementation = ExceptionResponse.class)
+                                            )
+                                    )
+                            }
+                    )
             )
         }
     )
