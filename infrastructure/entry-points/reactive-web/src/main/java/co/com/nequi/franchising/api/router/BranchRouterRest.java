@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -60,7 +61,8 @@ public class BranchRouterRest {
     })
     @Bean
     public RouterFunction<ServerResponse> branchRoutes(BranchHandler handler) {
-        return route(POST(BranchConstants.ENDPOINT_CREATE_BRANCH), handler::saveBranch);
+        return route(POST(BranchConstants.ENDPOINT_CREATE_BRANCH), handler::saveBranch)
+                .andRoute(PUT(BranchConstants.ENDPOINT_UPDATE_BRANCH_NAME), handler::updateBranchName);
     }
 
 }

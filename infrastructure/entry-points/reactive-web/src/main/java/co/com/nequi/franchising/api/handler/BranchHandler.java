@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.BranchRequestDto;
+import co.com.nequi.franchising.api.dto.request.BranchUpdateNameDto;
 import co.com.nequi.franchising.api.dto.response.BranchResponseDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.model.branch.Branch;
@@ -61,5 +62,44 @@ public class BranchHandler {
                             });
                 });
     }
+
+    public Mono<ServerResponse> updateBranchName(ServerRequest request) {
+        Long branchId;
+        try{
+            branchId = Long.valueOf(request.pathVariable(BranchConstants.PATH_VARIABLE_BRANCH_ID));
+        }catch (NumberFormatException e){
+            ExceptionResponse errorResponse = new ExceptionResponse(
+                    LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST.value(),
+                    BranchConstants.ERROR_BRANCH_ID_MUST_BE_NUMERIC, BranchConstants.ENDPOINT_UPDATE_BRANCH_NAME
+            );
+            return ServerResponse.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(errorResponse);
+        }
+        return request.bodyToMono(BranchUpdateNameDto.class)
+                .flatMap(branchUpdateNameDto -> {
+                    if (branchUpdateNameDto == null || branchUpdateNameDto.name() == null || branchUpdateNameDto.name().isBlank()) {
+                        ExceptionResponse errorResponse = new ExceptionResponse(
+                                LocalDateTime.now().toString(), HttpStatus.BAD_REQUEST.value(),
+                                BranchConstants.ERROR_BRANCH_NAME_NOT_NULL_OR_EMPTY, BranchConstants.ENDPOINT_UPDATE_BRANCH_NAME
+                        );
+                        return ServerResponse.badRequest()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(errorResponse);
+                    }
+                    return branchUseCase.updateBranchName(branchId, branchUpdateNameDto.name())
+                            .flatMap(updatedBranch -> {
+                                BranchResponseDto responseDto = new BranchResponseDto(
+                                        updatedBranch.getId(),
+                                        updatedBranch.getName(),
+                                        updatedBranch.getFranchiseId()
+                                );
+                                return ServerResponse.ok()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(responseDto);
+                            });
+                });
+    }
+
 
 }
