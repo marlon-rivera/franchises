@@ -34,7 +34,7 @@ public class ProductUseCase {
                         ));
     }
 
-    public Mono<Void> deleteProduct(Long productId, Long branchId) {
+    public Mono<Void> deleteProductFromBranch(Long productId, Long branchId) {
         if (productId == null || branchId == null) {
             throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_ID_OR_BRANCH_ID_NOT_VALID);
         }

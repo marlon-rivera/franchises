@@ -69,7 +69,7 @@ public class ProductHandler {
                 Long productId = Long.valueOf(request.pathVariable(ProductConstants.PATH_VARIABLE_PRODUCT_ID));
                 Long branchId = Long.valueOf(request.pathVariable(ProductConstants.PATH_VARIABLE_BRANCH_ID));
 
-                return productUseCase.deleteProduct(productId, branchId)
+                return productUseCase.deleteProductFromBranch(productId, branchId)
                         .then(ServerResponse.noContent().build());
 
             } catch (NumberFormatException e) {
