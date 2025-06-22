@@ -25,7 +25,7 @@ public class ProductUseCase {
     public Mono<ProductDto> saveProduct(Product product, Integer quantity, Long branchId) {
         validateProduct(product, quantity, branchId);
         return branchRepository.findById(branchId)
-                .switchIfEmpty(Mono.error(new BranchNotExistException(BranchMessagesConstants.ERROR_BRANCH_NOT_EXIST)))
+                .switchIfEmpty(Mono.error(new BranchNotExistException(BranchMessagesConstants.ERROR_BRANCH_NOT_EXIST + branchId)))
                 .flatMap(branch -> productRepository.save(product)
                         .flatMap(savedProduct ->
                                 branchProductRepository.save(BranchProduct.builder().productId(savedProduct.getId()).branchId(branchId).stock(quantity).build())
