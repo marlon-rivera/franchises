@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 
 class ProductHandlerTest {
 
@@ -26,6 +27,7 @@ class ProductHandlerTest {
         webTestClient = WebTestClient.bindToRouterFunction(
                 org.springframework.web.reactive.function.server.RouterFunctions.route()
                         .POST("/api/product/create", handler::saveProduct).build()
+                        .andRoute(DELETE("/api/product/delete/product/{productId}/branch/{branchId}"), handler::deleteProductFromBranch)
         ).build();
     }
 
@@ -106,6 +108,28 @@ class ProductHandlerTest {
                 .uri("/api/product/create")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .bodyValue(requestDto)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void shouldDeleteProductFromBranch() {
+        Long productId = 1L;
+        Long branchId = 1L;
+
+        when(productUseCase.deleteProductFromBranch(productId, branchId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri("/api/product/delete/product/{productId}/branch/{branchId}", productId, branchId)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenProductIdOrBranchIdIsNotValid() {
+        webTestClient.delete()
+                .uri("/api/product/delete/product/invalid/branch/invalid")
                 .exchange()
                 .expectStatus().isBadRequest();
     }

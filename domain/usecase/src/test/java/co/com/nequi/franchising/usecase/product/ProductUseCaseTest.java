@@ -149,4 +149,44 @@ class ProductUseCaseTest {
                 .verify();
     }
 
+    @Test
+    void shouldDeleteProductFromBranchSuccessfully() {
+        Long productId = 1L;
+        Long branchId = 1L;
+
+        when(branchProductRepository.findByProductIdAndBranchId(productId, branchId))
+                .thenReturn(Mono.just(new BranchProduct(1L, branchId, productId, 10)));
+        when(branchProductRepository.delete(any(BranchProduct.class))).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.deleteProductFromBranch(productId, branchId))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenDeleteBranchIdIsNull() {
+        Long productId = null;
+        Long branchId = 1L;
+
+        ProductCreationException exception = assertThrows(
+                ProductCreationException.class,
+                () -> productUseCase.deleteProductFromBranch(productId, branchId)
+        );
+
+        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnErrorWhenDeleteProductIdIsNull() {
+        Long productId = 1L;
+        Long branchId = null;
+
+        ProductCreationException exception = assertThrows(
+                ProductCreationException.class,
+                () -> productUseCase.deleteProductFromBranch(productId, branchId)
+        );
+
+        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+    }
+
+
 }

@@ -50,4 +50,35 @@ class ProductBranchRepositoryAdapterTest {
         verify(repository).save(any(BranchProductData.class));
     }
 
+    @Test
+    void shouldFindByProductIdAndBranchIdSuccessfully() {
+        Long productId = 1L;
+        Long branchId = 1L;
+        BranchProduct productBranch = new BranchProduct(productId, branchId, 1L, 10);
+        BranchProductData data = new BranchProductData();
+
+        when(repository.findByProductIdAndBranchId(productId, branchId)).thenReturn(Mono.just(data));
+        when(mapper.map(data, BranchProduct.class)).thenReturn(productBranch);
+
+        StepVerifier.create(adapter.findByProductIdAndBranchId(productId, branchId))
+                .expectNext(productBranch)
+                .verifyComplete();
+
+        verify(repository).findByProductIdAndBranchId(productId, branchId);
+    }
+
+    @Test
+    void shouldDeleteProductBranchSuccessfully() {
+        BranchProduct productBranch = new BranchProduct(1L, 1L, 1L, 10);
+        BranchProductData data = new BranchProductData();
+
+        when(mapper.map(productBranch, BranchProductData.class)).thenReturn(data);
+        when(repository.delete(data)).thenReturn(Mono.empty());
+
+        StepVerifier.create(adapter.delete(productBranch))
+                .verifyComplete();
+
+        verify(repository).delete(data);
+    }
+
 }
