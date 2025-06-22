@@ -188,5 +188,76 @@ class ProductUseCaseTest {
         assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
     }
 
+    @Test
+    void shouldUpdateStockSuccessfully() {
+        Long productId = 1L;
+        Long branchId = 1L;
+        Integer quantity = 20;
 
+        BranchProduct existingBranchProduct = new BranchProduct(1L, branchId, productId, 10);
+        when(branchProductRepository.findByProductIdAndBranchId(productId, branchId))
+                .thenReturn(Mono.just(existingBranchProduct));
+        when(branchProductRepository.save(any(BranchProduct.class)))
+                .thenReturn(Mono.just(new BranchProduct(1L, branchId, productId, quantity)));
+
+        StepVerifier.create(productUseCase.updateStock(productId, branchId, quantity))
+                .expectNextMatches(updatedBranchProduct -> updatedBranchProduct.getStock().equals(quantity))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateStockProductIdIsNull() {
+        Long productId = null;
+        Long branchId = 1L;
+        Integer quantity = 20;
+
+        ProductCreationException exception = assertThrows(
+                ProductCreationException.class,
+                () -> productUseCase.updateStock(productId, branchId, quantity)
+        );
+
+        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateStockBranchIdIsNull() {
+        Long productId = 1L;
+        Long branchId = null;
+        Integer quantity = 20;
+
+        ProductCreationException exception = assertThrows(
+                ProductCreationException.class,
+                () -> productUseCase.updateStock(productId, branchId, quantity)
+        );
+
+        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateStockQuantityIsNull() {
+        Long productId = 1L;
+        Long branchId = 1L;
+        Integer quantity = null;
+
+        ProductCreationException exception = assertThrows(
+                ProductCreationException.class,
+                () -> productUseCase.updateStock(productId, branchId, quantity)
+        );
+
+        assertEquals("The product quantity must not be null.", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateStockQuantityIsNegative() {
+        Long productId = 1L;
+        Long branchId = 1L;
+        Integer quantity = -5;
+
+        ProductCreationException exception = assertThrows(
+                ProductCreationException.class,
+                () -> productUseCase.updateStock(productId, branchId, quantity)
+        );
+
+        assertEquals("The product quantity must be greater than zero.", exception.getMessage());
+    }
 }
