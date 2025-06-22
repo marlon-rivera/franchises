@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.ProductRequestDto;
+import co.com.nequi.franchising.api.dto.request.ProductUpdateNameDto;
 import co.com.nequi.franchising.api.dto.request.ProductUpdateStockRequestDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.model.product.Product;
@@ -104,6 +105,41 @@ public class ProductHandler {
                             .flatMap(updatedBranchProduct -> ServerResponse.ok()
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .bodyValue(updatedBranchProduct));
+                });
+    }
+
+    public Mono<ServerResponse> updateProductName(ServerRequest request){
+        Long productId;
+        try {
+            productId = Long.valueOf(request.pathVariable(ProductConstants.PATH_VARIABLE_PRODUCT_ID));
+        } catch (NumberFormatException e) {
+            ExceptionResponse errorResponse = new ExceptionResponse(
+                    LocalDateTime.now().toString(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    ProductConstants.ERROR_PRODUCT_ID_OR_BRANCH_ID_NOT_VALID,
+                    ProductConstants.ENDPOINT_UPDATE_STOCK
+            );
+            return ServerResponse.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(errorResponse);
+        }
+        return request.bodyToMono(ProductUpdateNameDto.class)
+                .flatMap(productUpdateNameDto -> {
+                    if (productUpdateNameDto.name() == null || productUpdateNameDto.name().isBlank()) {
+                        ExceptionResponse errorResponse = new ExceptionResponse(
+                                LocalDateTime.now().toString(),
+                                HttpStatus.BAD_REQUEST.value(),
+                                ProductConstants.ERROR_PRODUCT_NAME_NOT_NULL_OR_EMPTY,
+                                ProductConstants.ENDPOINT_UPDATE_STOCK
+                        );
+                        return ServerResponse.badRequest()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(errorResponse);
+                    }
+                    return productUseCase.updateProductName(productId, productUpdateNameDto.name())
+                            .flatMap(updatedProduct -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(updatedProduct));
                 });
     }
 

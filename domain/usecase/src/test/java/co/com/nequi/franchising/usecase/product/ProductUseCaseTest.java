@@ -5,7 +5,9 @@ import co.com.nequi.franchising.model.branch.gateways.BranchRepository;
 import co.com.nequi.franchising.model.branchproduct.BranchProduct;
 import co.com.nequi.franchising.model.branchproduct.gateways.BranchProductRepository;
 import co.com.nequi.franchising.model.exceptions.BranchNotExistException;
+import co.com.nequi.franchising.model.exceptions.InvalidDataException;
 import co.com.nequi.franchising.model.exceptions.ProductCreationException;
+import co.com.nequi.franchising.model.exceptions.ProductNotExistException;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.model.product.gateways.ProductRepository;
 import co.com.nequi.franchising.usecase.dto.ProductDto;
@@ -259,5 +261,54 @@ class ProductUseCaseTest {
         );
 
         assertEquals("The product quantity must be greater than zero.", exception.getMessage());
+    }
+
+    @Test
+    void shouldUpdateProductNameSuccessfully() {
+        Long productId = 1L;
+        String newName = "Updated Product Name";
+
+        Product existingProduct = new Product(productId, "Old Product Name");
+        when(productRepository.findById(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(new Product(productId, newName)));
+
+        StepVerifier.create(productUseCase.updateProductName(productId, newName))
+                .expectNextMatches(updatedProduct -> updatedProduct.getName().equals(newName))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateProductNameIsNull() {
+        Long productId = 1L;
+        String newName = null;
+
+        StepVerifier.create(productUseCase.updateProductName(productId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidDataException &&
+                        throwable.getMessage().equals("The product name must not be null or empty."))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateProductNameIsEmpty() {
+        Long productId = 1L;
+        String newName = "";
+
+        StepVerifier.create(productUseCase.updateProductName(productId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidDataException &&
+                        throwable.getMessage().equals("The product name must not be null or empty."))
+                .verify();
+    }
+
+    @Test
+    void shouldReturnErrorWhenUpdateProductDoesNotExist() {
+        Long productId = 999L;
+        String newName = "Updated Product Name";
+
+        when(productRepository.findById(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productUseCase.updateProductName(productId, newName))
+                .expectErrorMatches(throwable -> throwable instanceof ProductNotExistException &&
+                        throwable.getMessage().equals("The product does not exist with ID: " + productId))
+                .verify();
     }
 }

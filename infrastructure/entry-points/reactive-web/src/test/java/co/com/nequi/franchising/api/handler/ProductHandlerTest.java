@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.ProductRequestDto;
+import co.com.nequi.franchising.api.dto.request.ProductUpdateNameDto;
 import co.com.nequi.franchising.api.dto.request.ProductUpdateStockRequestDto;
 import co.com.nequi.franchising.model.branchproduct.BranchProduct;
 import co.com.nequi.franchising.model.product.Product;
@@ -32,6 +33,7 @@ class ProductHandlerTest {
                         .POST("/api/product/create", handler::saveProduct).build()
                         .andRoute(DELETE("/api/product/delete/product/{productId}/branch/{branchId}"), handler::deleteProductFromBranch)
                         .andRoute(PUT("/api/product/update/stock"), handler::updateStockProduct)
+                        .andRoute(PUT("/api/product/{productId}/update-name"), handler::updateProductName)
         ).build();
     }
 
@@ -203,6 +205,66 @@ class ProductHandlerTest {
                 .uri("/api/product/update/stock")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .bodyValue(requestDto)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void shouldUpdateProductName() {
+        Long productId = 1L;
+        String newName = "Updated Product Name";
+        ProductUpdateNameDto requestDto = new ProductUpdateNameDto(newName);
+
+        when(productUseCase.updateProductName(productId, newName))
+                .thenReturn(Mono.just(new Product(productId, newName)));
+
+        webTestClient.put()
+                .uri("/api/product/{productId}/update-name", productId)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(requestDto)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Product.class)
+                .value(response -> {
+                    assertEquals(productId, response.getId());
+                    assertEquals(newName, response.getName());
+                });
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdateProductNameRequestIsInvalid() {
+        Long productId = 1L;
+        ProductUpdateNameDto requestDto = new ProductUpdateNameDto(null);
+
+        webTestClient.put()
+                .uri("/api/product/{productId}/update-name", productId)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(requestDto)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdateProductNameWithEmptyName() {
+        Long productId = 1L;
+        ProductUpdateNameDto requestDto = new ProductUpdateNameDto("");
+
+        webTestClient.put()
+                .uri("/api/product/{productId}/update-name", productId)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(requestDto)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenInvalidProductId() {
+        String invalidProductId = "invalid";
+
+        webTestClient.put()
+                .uri("/api/product/{productId}/update-name", invalidProductId)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(new ProductUpdateNameDto("New Name"))
                 .exchange()
                 .expectStatus().isBadRequest();
     }

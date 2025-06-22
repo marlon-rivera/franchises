@@ -6,6 +6,7 @@ import co.com.nequi.franchising.model.branchproduct.gateways.BranchProductReposi
 import co.com.nequi.franchising.model.exceptions.BranchNotExistException;
 import co.com.nequi.franchising.model.exceptions.InvalidDataException;
 import co.com.nequi.franchising.model.exceptions.ProductCreationException;
+import co.com.nequi.franchising.model.exceptions.ProductNotExistException;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.model.product.gateways.ProductRepository;
 import co.com.nequi.franchising.usecase.dto.ProductDto;
@@ -50,6 +51,18 @@ public class ProductUseCase {
                 .flatMap(branchProduct -> {
                     branchProduct.setStock(quantity);
                     return branchProductRepository.save(branchProduct);
+                });
+    }
+
+    public Mono<Product> updateProductName(Long productId, String newName){
+        if (newName == null || newName.isBlank()) {
+            return Mono.error(new InvalidDataException(ProductMessagesConstants.ERROR_PRODUCT_NAME_NOT_NULL_OR_EMPTY));
+        }
+        return productRepository.findById(productId)
+                .switchIfEmpty(Mono.error(new ProductNotExistException(ProductMessagesConstants.ERROR_PRODUCT_NOT_EXIST + productId)))
+                .flatMap(product -> {
+                    product.setName(newName);
+                    return productRepository.save(product);
                 });
     }
 
