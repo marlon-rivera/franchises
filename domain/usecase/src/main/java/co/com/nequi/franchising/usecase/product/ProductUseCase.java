@@ -4,6 +4,7 @@ import co.com.nequi.franchising.model.branch.gateways.BranchRepository;
 import co.com.nequi.franchising.model.branchproduct.BranchProduct;
 import co.com.nequi.franchising.model.branchproduct.gateways.BranchProductRepository;
 import co.com.nequi.franchising.model.exceptions.BranchNotExistException;
+import co.com.nequi.franchising.model.exceptions.InvalidDataException;
 import co.com.nequi.franchising.model.exceptions.ProductCreationException;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.model.product.gateways.ProductRepository;
@@ -33,6 +34,15 @@ public class ProductUseCase {
                         ));
     }
 
+    public Mono<Void> deleteProductFromBranch(Long productId, Long branchId) {
+        if (productId == null || branchId == null) {
+            throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_ID_OR_BRANCH_ID_NOT_VALID);
+        }
+        return branchProductRepository.findByProductIdAndBranchId(productId, branchId)
+                .switchIfEmpty(Mono.error(new InvalidDataException(ProductMessagesConstants.ERROR_COMBINATION_PRODUCT_BRANCH_NOT_EXIST)))
+                .flatMap(branchProductRepository::delete);
+    }
+
     private void validateProduct(Product product, Integer quantity, Long branchId) {
         if (product == null || product.getName() == null || product.getName().isBlank()) {
             throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_NAME_NOT_NULL_OR_EMPTY);
@@ -46,6 +56,5 @@ public class ProductUseCase {
         if (branchId == null) {
             throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_BRANCH_ID_NOT_VALID);
         }
-
     }
 }
