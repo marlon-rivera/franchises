@@ -86,6 +86,33 @@ public class FranchiseRouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = FranchiseConstants.ENDPOINT_UPDATE_FRANCHISE_NAME,
+                    method = RequestMethod.PUT,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "updateFranchiseName",
+                    operation = @Operation(
+                            summary = "Update Franchise Name",
+                            operationId = "updateFranchiseName",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Franchise name updated successfully",
+                                            content = @Content(schema = @Schema(implementation = FranchiseResponseDto.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Franchise ID must be numeric or name must not be null or empty",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    )
+                            }
+                    )
             )
     })
     @Bean
