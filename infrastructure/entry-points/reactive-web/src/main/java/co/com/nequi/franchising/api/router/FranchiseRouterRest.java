@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.router;
 
 import co.com.nequi.franchising.api.dto.request.FranchiseRequestDto;
+import co.com.nequi.franchising.api.dto.request.ProductUpdateStockRequestDto;
 import co.com.nequi.franchising.api.dto.response.FranchiseResponseDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.api.handler.FranchiseHandler;
@@ -52,6 +53,33 @@ public class FranchiseRouterRest {
                                             content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
                                     ),
 
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    )
+                            }
+                    )
+            ),
+            @RouterOperation(
+                    path = FranchiseConstants.ENDPOINT_GET_TOP_PRODUCTS_BY_BRANCH,
+                    method = RequestMethod.GET,
+                    beanClass = FranchiseHandler.class,
+                    beanMethod = "getTopStockProductsByBranch",
+                    operation = @Operation(
+                            summary = "Get Top Stock Products by Branch",
+                            operationId = "getTopStockProductsByBranch",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Top stock products retrieved successfully",
+                                            content = @Content(schema = @Schema(implementation = ProductUpdateStockRequestDto.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Invalid branch ID",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    ),
                                     @ApiResponse(
                                             responseCode = "500",
                                             description = "Internal server error",
