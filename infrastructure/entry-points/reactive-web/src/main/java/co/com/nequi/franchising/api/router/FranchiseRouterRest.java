@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -62,6 +63,8 @@ public class FranchiseRouterRest {
     })
     @Bean
     public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler) {
-        return route(POST(FranchiseConstants.ENDPOINT_CREATE_FRANCHISE), handler::saveFranchise);
+        return route(POST(FranchiseConstants.ENDPOINT_CREATE_FRANCHISE), handler::saveFranchise)
+                .andRoute(GET(FranchiseConstants.ENDPOINT_GET_TOP_PRODUCTS_BY_BRANCH), handler::getTopStockProductsByBranch);
+
     }
 }

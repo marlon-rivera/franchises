@@ -14,8 +14,16 @@ import org.springframework.context.annotation.Configuration;
 public class UseCaseConfig {
 
     @Bean
-    public FranchiseUseCase franchiseUseCase(FranchiseRepository franchiseRepository) {
-        return new FranchiseUseCase(franchiseRepository);
+    public FranchiseUseCase franchiseUseCase(
+            FranchiseRepository franchiseRepository,
+            BranchRepository branchRepository,
+            ProductRepository productRepository,
+            BranchProductRepository branchProductRepository) {
+        return new FranchiseUseCase(
+                franchiseRepository,
+                branchRepository,
+                productRepository,
+                branchProductRepository);
     }
 
     @Bean

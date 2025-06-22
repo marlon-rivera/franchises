@@ -30,4 +30,10 @@ public class ProductBranchRepositoryAdapter extends ReactiveAdapterOperations<
     public Mono<Void> delete(BranchProduct branchProduct) {
         return repository.delete(toData(branchProduct));
     }
+
+    @Override
+    public Mono<BranchProduct> findTopByBranchIdOrderByStockDesc(Long branchId) {
+        return repository.findTopByBranchIdOrderByStockDesc(branchId)
+                .map(this::toEntity);
+    }
 }
