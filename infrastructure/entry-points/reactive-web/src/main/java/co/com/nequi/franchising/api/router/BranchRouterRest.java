@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -56,11 +57,51 @@ public class BranchRouterRest {
                                     )
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = BranchConstants.ENDPOINT_UPDATE_BRANCH_NAME,
+                    method = RequestMethod.PUT,
+                    beanClass = BranchHandler.class,
+                    beanMethod = "updateBranchName",
+                    operation = @Operation(
+                            summary = "Update Branch Name",
+                            operationId = "updateBranchName",
+                            parameters = {
+                                    @io.swagger.v3.oas.annotations.Parameter(
+                                            name = "branchId",
+                                            description = "ID of the branch to update",
+                                            required = true
+                                    )
+                            },
+                            requestBody = @RequestBody(
+                                    description = "DTO containing the new branch name",
+                                    required = true,
+                                    content = @Content(schema = @Schema(implementation = BranchRequestDto.class))
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Branch name updated successfully",
+                                            content = @Content(schema = @Schema(implementation = BranchResponseDto.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Branch ID is invalid or name is missing",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "500",
+                                            description = "Internal server error",
+                                            content = @Content(schema = @Schema(implementation = ExceptionResponse.class))
+                                    )
+                            }
+                    )
             )
     })
     @Bean
     public RouterFunction<ServerResponse> branchRoutes(BranchHandler handler) {
-        return route(POST(BranchConstants.ENDPOINT_CREATE_BRANCH), handler::saveBranch);
+        return route(POST(BranchConstants.ENDPOINT_CREATE_BRANCH), handler::saveBranch)
+                .andRoute(PUT(BranchConstants.ENDPOINT_UPDATE_BRANCH_NAME), handler::updateBranchName);
     }
 
 }
