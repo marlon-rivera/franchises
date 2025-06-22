@@ -43,6 +43,28 @@ public class ProductUseCase {
                 .flatMap(branchProductRepository::delete);
     }
 
+    public Mono<BranchProduct> updateStock(Long productId, Long branchId, Integer quantity) {
+        validateUpdateStock(productId, branchId, quantity);
+        return branchProductRepository.findByProductIdAndBranchId(productId, branchId)
+                .switchIfEmpty(Mono.error(new InvalidDataException(ProductMessagesConstants.ERROR_COMBINATION_PRODUCT_BRANCH_NOT_EXIST)))
+                .flatMap(branchProduct -> {
+                    branchProduct.setStock(quantity);
+                    return branchProductRepository.save(branchProduct);
+                });
+    }
+
+    private void validateUpdateStock(Long productId, Long branchId, Integer quantity) {
+        if (productId == null || branchId == null) {
+            throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_ID_OR_BRANCH_ID_NOT_VALID);
+        }
+        if (quantity == null) {
+            throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_QUANTITY_NOT_NULL);
+        }
+        if (quantity < BigInteger.ZERO.intValue()) {
+            throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_QUANTITY_NOT_VALID);
+        }
+    }
+
     private void validateProduct(Product product, Integer quantity, Long branchId) {
         if (product == null || product.getName() == null || product.getName().isBlank()) {
             throw new ProductCreationException(ProductMessagesConstants.ERROR_PRODUCT_NAME_NOT_NULL_OR_EMPTY);

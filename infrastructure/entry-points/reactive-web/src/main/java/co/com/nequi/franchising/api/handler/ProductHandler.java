@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.ProductRequestDto;
+import co.com.nequi.franchising.api.dto.request.ProductUpdateStockRequestDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.usecase.product.ProductUseCase;
@@ -84,6 +85,50 @@ public class ProductHandler {
                         .bodyValue(errorResponse);
             }
         });
+    }
+
+    public Mono<ServerResponse> updateStockProduct(ServerRequest request) {
+        return request.bodyToMono(ProductUpdateStockRequestDto.class)
+                .flatMap(productUpdateStockRequestDto -> {
+                    ExceptionResponse errorResponse = validateUpdateStockRequest(productUpdateStockRequestDto);
+                    if (errorResponse != null) {
+                        return ServerResponse.badRequest()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(errorResponse);
+                    }
+                    return productUseCase.updateStock(
+                            productUpdateStockRequestDto.productId(),
+                            productUpdateStockRequestDto.branchId(),
+                            productUpdateStockRequestDto.quantity()
+                    )
+                            .flatMap(updatedBranchProduct -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(updatedBranchProduct));
+                });
+    }
+
+    private ExceptionResponse validateUpdateStockRequest(ProductUpdateStockRequestDto productUpdateStockRequestDto) {
+        String message = "";
+
+        if (productUpdateStockRequestDto == null || productUpdateStockRequestDto.productId() == null) {
+            message = ProductConstants.ERROR_PRODUCT_ID_OR_BRANCH_ID_NOT_VALID;
+        } else if (productUpdateStockRequestDto.branchId() == null) {
+            message = ProductConstants.ERROR_PRODUCT_BRANCH_ID_NOT_VALID;
+        } else if (productUpdateStockRequestDto.quantity() == null) {
+            message = ProductConstants.ERROR_PRODUCT_QUANTITY_NOT_NULL;
+        } else if (productUpdateStockRequestDto.quantity() < 0) {
+            message = ProductConstants.ERROR_PRODUCT_QUANTITY_NOT_VALID;
+        }
+
+        if (!message.isEmpty()) {
+            return new ExceptionResponse(
+                    LocalDateTime.now().toString(),
+                    HttpStatus.BAD_REQUEST.value(),
+                    message,
+                    ProductConstants.ENDPOINT_UPDATE_STOCK
+            );
+        }
+        return null;
     }
 
 }
