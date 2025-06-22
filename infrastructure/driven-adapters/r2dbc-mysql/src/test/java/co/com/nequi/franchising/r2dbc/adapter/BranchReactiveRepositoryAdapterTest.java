@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -42,6 +43,43 @@ class BranchReactiveRepositoryAdapterTest {
                 .verifyComplete();
 
         org.mockito.Mockito.verify(repository).save(data);
+    }
+
+    @Test
+    void shouldFindByIdSuccessfully() {
+        BranchData data = new BranchData();
+        Branch branch = Branch.builder().name("Test Branch").build();
+
+        when(repository.findById(1L)).thenReturn(Mono.just(data));
+        when(mapper.map(data, Branch.class)).thenReturn(branch);
+
+        StepVerifier.create(adapter.findById(1L))
+                .expectNext(branch)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldBeEmptyWhenBranchNotFound() {
+        when(repository.findById(1L)).thenReturn(Mono.empty());
+
+        StepVerifier.create(adapter.findById(1L))
+                .expectComplete()
+                .verify();
+
+        org.mockito.Mockito.verify(repository).findById(1L);
+    }
+
+    @Test
+    void shouldFindByFranchiseIdSuccessfully() {
+        BranchData data = new BranchData();
+        Branch branch = Branch.builder().name("Test Branch").build();
+
+        when(repository.findByFranchiseId(1L)).thenReturn(Flux.just(data));
+        when(mapper.map(data, Branch.class)).thenReturn(branch);
+
+        StepVerifier.create(adapter.findByFranchiseId(1L))
+                .expectNext(branch)
+                .verifyComplete();
     }
 
 }
