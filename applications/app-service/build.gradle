@@ -1,4 +1,8 @@
-apply plugin: 'org.springframework.boot'
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'java'
+}
 
 dependencies {
 	implementation project(':reactive-web')
@@ -26,6 +30,6 @@ jar {
 }
 
 bootJar {
-    // Sets output jar name
-    archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
+    archiveBaseName = 'franchise-api'
+    archiveVersion = '0.0.1-SNAPSHOT'
 }
