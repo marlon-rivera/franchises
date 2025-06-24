@@ -25,6 +25,21 @@ tasks.register('explodedJar', Copy) {
     into layout.buildDirectory.dir("exploded")
 }
 
+def dotenv(String path) {
+    def file = rootProject.file(path)
+    if (!file.exists()) return [:]
+
+    def env = [:]
+    file.eachLine { line ->
+        if (line && !line.startsWith("#") && line.contains('=')) {
+            def (key, value) = line.split('=', 2)
+            env[key.trim()] = value.trim()
+        }
+    }
+    return env
+}
+
+
 jar {
     // To disable the *-plain.jar
     enabled = false
@@ -33,4 +48,8 @@ jar {
 bootJar {
     archiveBaseName = 'franchise-api'
     archiveVersion = '0.0.1-SNAPSHOT'
+}
+
+bootRun {
+    environment dotenv('.env')
 }
