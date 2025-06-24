@@ -1,0 +1,4 @@
+URL_DATABASE=r2dbc:mysql://localhost:3306/franchising_db
+USER_DATABASE=root
+PASS_DATABASE=admin
+DRIVER_DATABASE=com.mysql.cj.jdbc.Driver

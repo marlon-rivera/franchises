@@ -6,7 +6,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 @Data
 @Table("product_branch")
-public class ProductBranchData {
+public class BranchProductData {
 
     @Id
     private Long id;
