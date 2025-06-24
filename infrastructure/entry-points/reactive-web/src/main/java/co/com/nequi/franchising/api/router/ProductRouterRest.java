@@ -1,11 +1,15 @@
 package co.com.nequi.franchising.api.router;
 
+import co.com.nequi.franchising.api.dto.request.ProductRequestDto;
+import co.com.nequi.franchising.api.dto.request.ProductUpdateNameDto;
+import co.com.nequi.franchising.api.dto.request.ProductUpdateStockRequestDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.api.handler.ProductHandler;
 import co.com.nequi.franchising.model.branchproduct.BranchProduct;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.utils.constants.ProductConstants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,6 +38,14 @@ public class ProductRouterRest {
                     operation = @Operation(
                             summary = "Create Product",
                             operationId = "createProduct",
+                            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                    description = "Entry DTO to create a product",
+                                    required = true,
+                                    content = @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = ProductRequestDto.class)
+                                    )
+                            ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
@@ -70,6 +82,20 @@ public class ProductRouterRest {
                     operation = @Operation(
                             summary = "Delete Product from Branch",
                             operationId = "deleteProductFromBranch",
+                            parameters = {
+                                    @io.swagger.v3.oas.annotations.Parameter(
+                                            name = "productId",
+                                            description = "ID of the product to delete",
+                                            required = true,
+                                            in = ParameterIn.PATH
+                                    ),
+                                    @io.swagger.v3.oas.annotations.Parameter(
+                                            name = "branchId",
+                                            description = "ID of the branch from which to delete the product",
+                                            required = true,
+                                            in = ParameterIn.PATH
+                                    )
+                            },
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
@@ -102,6 +128,14 @@ public class ProductRouterRest {
                     operation = @Operation(
                             summary = "Update Product Stock",
                             operationId = "updateProductStock",
+                            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                    description = "DTO containing the product ID and new stock quantity",
+                                    required = true,
+                                    content = @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = ProductUpdateStockRequestDto.class)
+                                    )
+                            ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
@@ -138,6 +172,22 @@ public class ProductRouterRest {
                     operation = @Operation(
                             summary = "Update Product Name",
                             operationId = "updateProductName",
+                            parameters = {
+                                    @io.swagger.v3.oas.annotations.Parameter(
+                                            name = "productId",
+                                            description = "ID of the product to update",
+                                            required = true,
+                                            in = ParameterIn.PATH
+                                    )
+                            },
+                            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                    description = "DTO containing the new product name",
+                                    required = true,
+                                    content = @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = ProductUpdateNameDto.class)
+                                    )
+                            ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",

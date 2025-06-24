@@ -1,6 +1,7 @@
 package co.com.nequi.franchising.api.router;
 
 import co.com.nequi.franchising.api.dto.request.FranchiseRequestDto;
+import co.com.nequi.franchising.api.dto.request.FranchiseUpdateNameDto;
 import co.com.nequi.franchising.api.dto.request.ProductUpdateStockRequestDto;
 import co.com.nequi.franchising.api.dto.response.FranchiseResponseDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
@@ -68,6 +69,14 @@ public class FranchiseRouterRest {
                     operation = @Operation(
                             summary = "Get Top Stock Products by Branch",
                             operationId = "getTopStockProductsByBranch",
+                            parameters = {
+                                    @io.swagger.v3.oas.annotations.Parameter(
+                                            name = "franchiseId",
+                                            description = "ID of the franchise to retrieve top stock products",
+                                            required = true,
+                                            in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH
+                                    )
+                            },
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",
@@ -95,6 +104,19 @@ public class FranchiseRouterRest {
                     operation = @Operation(
                             summary = "Update Franchise Name",
                             operationId = "updateFranchiseName",
+                            parameters = {
+                                    @io.swagger.v3.oas.annotations.Parameter(
+                                            name = "franchiseId",
+                                            description = "ID of the franchise to update",
+                                            required = true,
+                                            in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH
+                                    )
+                            },
+                            requestBody = @RequestBody(
+                                    description = "DTO containing the new franchise name",
+                                    required = true,
+                                    content = @Content(schema = @Schema(implementation = FranchiseUpdateNameDto.class))
+                            ),
                             responses = {
                                     @ApiResponse(
                                             responseCode = "200",

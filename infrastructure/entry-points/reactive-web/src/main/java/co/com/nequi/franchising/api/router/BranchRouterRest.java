@@ -1,11 +1,13 @@
 package co.com.nequi.franchising.api.router;
 
 import co.com.nequi.franchising.api.dto.request.BranchRequestDto;
+import co.com.nequi.franchising.api.dto.request.BranchUpdateNameDto;
 import co.com.nequi.franchising.api.dto.response.BranchResponseDto;
 import co.com.nequi.franchising.api.exception.ExceptionResponse;
 import co.com.nequi.franchising.api.handler.BranchHandler;
 import co.com.nequi.franchising.utils.constants.BranchConstants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -70,13 +72,14 @@ public class BranchRouterRest {
                                     @io.swagger.v3.oas.annotations.Parameter(
                                             name = "branchId",
                                             description = "ID of the branch to update",
-                                            required = true
+                                            required = true,
+                                            in = ParameterIn.PATH
                                     )
                             },
                             requestBody = @RequestBody(
                                     description = "DTO containing the new branch name",
                                     required = true,
-                                    content = @Content(schema = @Schema(implementation = BranchRequestDto.class))
+                                    content = @Content(schema = @Schema(implementation = BranchUpdateNameDto.class))
                             ),
                             responses = {
                                     @ApiResponse(

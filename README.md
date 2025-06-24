@@ -72,6 +72,8 @@ http://localhost:8080/webjars/swagger-ui/index.html
 > Alternativamente:  
 > `http://localhost:8080/swagger-ui.html` (según navegador o configuración)
 
+> Además se puede acceder a la documentación OpenAPI en:
+> http://dev-alb-274804447.us-east-1.elb.amazonaws.com/webjars/swagger-ui/index.html
 ---
 
 ## 🧱 Estructura del Proyecto
