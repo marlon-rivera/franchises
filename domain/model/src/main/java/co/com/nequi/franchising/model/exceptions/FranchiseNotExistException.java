@@ -1,7 +1,7 @@
 package co.com.nequi.franchising.model.exceptions;
 
-public class FranchiseNotExistException extends RuntimeException {
+public class FranchiseNotExistException extends BusinessException {
     public FranchiseNotExistException(String message) {
-        super(message);
+        super(message, 404);
     }
 }

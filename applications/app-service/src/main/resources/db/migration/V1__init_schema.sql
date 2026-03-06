@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS franchising_db;
-
-USE franchising_db;
 
 CREATE TABLE IF NOT EXISTS franchise (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,

@@ -24,7 +24,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
                 ProductHandler.class
         })
 @WebFluxTest
-@Import({CorsConfig.class, SecurityHeadersConfig.class, UseCaseConfig.class})
+@Import({CorsConfig.class, SecurityHeadersConfig.class})
 class ConfigTest {
 
     @Autowired
@@ -37,7 +37,7 @@ class ConfigTest {
                 .bodyValue("{\"name\":\"Test Franchise\"}")
                 .header("Content-Type", "application/json")
                 .exchange()
-                .expectStatus().isOk() // O ajusta si esperas otro status
+                .expectStatus().isCreated()
                 .expectHeader().valueEquals("Content-Security-Policy", "default-src 'self'; frame-ancestors 'self'; form-action 'self'")
                 .expectHeader().valueEquals("Strict-Transport-Security", "max-age=31536000;")
                 .expectHeader().valueEquals("X-Content-Type-Options", "nosniff")

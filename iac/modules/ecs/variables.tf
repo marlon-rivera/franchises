@@ -59,13 +59,30 @@ variable "database_url" {
     type        = string
 }
 
+variable "flyway_url" {
+    description = "URL of the database for Flyway migrations"
+    type        = string
+}
+
 variable "database_user" {
     description = "Username for the database"
     type        = string
 }
 
 variable "database_password" {
-    description = "Password for the database"
+    description = "Password for the database (deprecated - use database_password_secret_arn)"
+    type        = string
+    sensitive   = true
+    default     = ""
+}
+
+variable "database_password_secret_arn" {
+    description = "ARN of the Secrets Manager secret containing the database password"
+    type        = string
+}
+
+variable "region" {
+    description = "AWS region for CloudWatch logs"
     type        = string
 }
 

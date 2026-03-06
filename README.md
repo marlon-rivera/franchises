@@ -9,10 +9,12 @@ Este proyecto es una API REST desarrollada con **Spring WebFlux** bajo la arquit
 - Java 21
 - Spring Boot 3.5.0 + WebFlux
 - R2DBC + MySQL 8
-- Flyway
+- Flyway (migraciones con JDBC)
 - Docker + Docker Compose
 - OpenAPI (Swagger UI)
 - Clean Architecture (Scaffold - Bancolombia)
+- Terraform (IaC)
+- AWS (ECS Fargate, RDS, ALB, API Gateway, ECR)
 
 ---
 
@@ -20,14 +22,13 @@ Este proyecto es una API REST desarrollada con **Spring WebFlux** bajo la arquit
 
 ### ✅ Requisitos
 
-- Docker (opcional)
-- Gradle 8.14.2
-- JDK 21
-- MySQL 8
+- Docker y Docker Compose
 
 ---
 
-### 📦 Opción 1: Ejecutar con Docker Compose
+### 📦 Opción 1: Ejecutar con Docker Compose (recomendado)
+
+Solo necesitas Docker instalado. Este comando construye y levanta todo:
 
 ```bash
 docker-compose -f deployment/docker-compose.yml up --build
@@ -38,25 +39,45 @@ Esto iniciará dos contenedores:
 1. **franchising-db**: base de datos MySQL expuesta en `localhost:3307` (puerto interno 3306)
 2. **franchising-api**: API Spring expuesta en `localhost:8080`
 
+> La API espera automáticamente a que MySQL esté listo antes de arrancar.
+> Flyway ejecuta las migraciones y datos de prueba al iniciar.
+
+Para detener:
+```bash
+docker-compose -f deployment/docker-compose.yml down
+```
+
+Para limpiar volúmenes (reset BD):
+```bash
+docker-compose -f deployment/docker-compose.yml down -v
+```
+
 ---
 
 ### 🧪 Opción 2: Ejecutar manualmente sin Docker
 
-1. Asegúrate de tener MySQL corriendo localmente con una base de datos llamada `franchising_db`.
+#### Requisitos adicionales
+- JDK 21
+- MySQL 8 corriendo localmente
 
-2. Configura el archivo `.env` que se encuentra en la raíz del proyecto con el siguiente contenido (o acopla a tu configuración):
+#### Pasos
 
-```env
-URL_DATABASE=r2dbc:mysql://localhost:3306/franchising_db
-USER_DATABASE=root
-PASS_DATABASE=admin
-DRIVER_DATABASE=com.mysql.cj.jdbc.Driver
+1. Crea la base de datos en MySQL:
+```sql
+CREATE DATABASE IF NOT EXISTS franchising_db;
 ```
 
-3. Ejecuta el proyecto con Gradle:
+2. Verifica el archivo `.env` en la raíz del proyecto:
+```env
+URL_DATABASE=r2dbc:mysql://localhost:3306/franchising_db
+FLYWAY_URL=jdbc:mysql://localhost:3306/franchising_db
+USER_DATABASE=root
+PASS_DATABASE=admin
+```
 
+3. Ejecuta el proyecto:
 ```bash
-./gradlew bootRun --no-configuration-cache
+./gradlew :app-service:bootRun --no-configuration-cache
 ```
 
 ---
@@ -68,12 +89,6 @@ Una vez levantado el proyecto, visita:
 ```
 http://localhost:8080/webjars/swagger-ui/index.html
 ```
-
-> Alternativamente:  
-> `http://localhost:8080/swagger-ui.html` (según navegador o configuración)
-
-> Además se puede acceder a la documentación OpenAPI en:
-> http://dev-alb-274804447.us-east-1.elb.amazonaws.com/webjars/swagger-ui/index.html
 ---
 
 ## 🧱 Estructura del Proyecto
@@ -145,9 +160,9 @@ Las variables están definidas en el archivo `.env` o el `docker-compose.yml`, y
 | Variable         | Descripción                              |
 |------------------|------------------------------------------|
 | `URL_DATABASE`   | Cadena R2DBC para conexión MySQL         |
+| `FLYWAY_URL`     | Cadena JDBC para migraciones Flyway      |
 | `USER_DATABASE`  | Usuario de la base de datos              |
 | `PASS_DATABASE`  | Contraseña del usuario de BD             |
-| `DRIVER_DATABASE`| Driver JDBC utilizado por la conexión    |
 
 ---
 

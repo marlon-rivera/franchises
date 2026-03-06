@@ -11,4 +11,10 @@ output "db_username" {
 output "db_password" {
   description = "Database master password"
   value       = random_password.db_password.result
+  sensitive   = true
+}
+
+output "db_password_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing the DB password"
+  value       = aws_secretsmanager_secret.db_password.arn
 }

@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -184,7 +185,7 @@ class FranchiseUseCaseTest {
         when(franchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.just(existingFranchise));
 
-        when(franchiseRepository.save(existingFranchise))
+        when(franchiseRepository.save(any(Franchise.class)))
                 .thenReturn(Mono.just(updatedFranchise));
         StepVerifier.create(franchiseUseCase.updateName(franchiseId, newName))
                 .expectNext(updatedFranchise)

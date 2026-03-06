@@ -8,11 +8,14 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    url: ${FLYWAY_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:franchising_db}}
+    user: ${USER_DATABASE}
+    password: ${PASS_DATABASE}
+    baseline-on-migrate: true
   r2dbc:
-    url:  ${URL_DATABASE}
+    url: ${URL_DATABASE}
     username: ${USER_DATABASE}
     password: ${PASS_DATABASE}
-    driverClassName: ${DRIVER_DATABASE:com.mysql.cj.jdbc.Driver}
 
 management:
   endpoints:

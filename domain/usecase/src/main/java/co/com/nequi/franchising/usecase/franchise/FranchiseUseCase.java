@@ -24,10 +24,12 @@ public class FranchiseUseCase {
     private final BranchProductRepository branchProductRepository;
 
     public Mono<Franchise> saveFranchise(Franchise franchise) {
-        if(franchise == null || franchise.getName() == null || franchise.getName().isBlank()) {
-            return Mono.error(new FranchiseCreationException(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY));
-        }
-        return franchiseRepository.save(franchise);
+        return Mono.defer(() -> {
+            if (franchise == null || franchise.getName() == null || franchise.getName().isBlank()) {
+                return Mono.error(new FranchiseCreationException(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY));
+            }
+            return franchiseRepository.save(franchise);
+        });
     }
 
     public Flux<TopProductByBranchDto> getTopStockProductsByBranch(Long franchiseId) {
@@ -36,32 +38,33 @@ public class FranchiseUseCase {
                         FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + franchiseId
                 )))
                 .flatMapMany(franchise ->
-                        branchRepository.findByFranchiseId(franchiseId))
-                        .flatMap(branch ->
-                                branchProductRepository.findTopByBranchIdOrderByStockDesc(branch.getId())
-                                .flatMap(branchProduct ->
-                                    productRepository.findById(branchProduct.getProductId())
-                                        .map(product -> new TopProductByBranchDto(
-                                                branch,
-                                                product,
-                                                branchProduct.getStock()
-                                        ))
-                                ));
-
-
+                        branchRepository.findByFranchiseId(franchiseId)
+                                .flatMap(branch ->
+                                        branchProductRepository.findTopByBranchIdOrderByStockDesc(branch.getId())
+                                                .flatMap(branchProduct ->
+                                                        productRepository.findById(branchProduct.getProductId())
+                                                                .map(product -> new TopProductByBranchDto(
+                                                                        branch,
+                                                                        product,
+                                                                        branchProduct.getStock()
+                                                                ))
+                                                )
+                                )
+                );
     }
 
     public Mono<Franchise> updateName(Long franchiseId, String newName) {
-        if (newName == null || newName.isBlank()) {
-            return Mono.error(new InvalidDataException(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY));
-        }
-        return franchiseRepository.findById(franchiseId)
-                .switchIfEmpty(Mono.error(new FranchiseNotExistException(
-                        FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + franchiseId
-                )))
-                .flatMap(franchise -> {
-                    franchise.setName(newName);
-                    return franchiseRepository.save(franchise);
-                });
+        return Mono.defer(() -> {
+            if (newName == null || newName.isBlank()) {
+                return Mono.error(new InvalidDataException(FranchiseMessagesConstants.ERROR_FRANCHISE_NAME_NOT_NULL_OR_EMPTY));
+            }
+            return franchiseRepository.findById(franchiseId)
+                    .switchIfEmpty(Mono.error(new FranchiseNotExistException(
+                            FranchiseMessagesConstants.ERROR_FRANCHISE_NOT_EXIST + franchiseId
+                    )))
+                    .flatMap(franchise -> franchiseRepository.save(
+                            franchise.toBuilder().name(newName).build()
+                    ));
+        });
     }
 }

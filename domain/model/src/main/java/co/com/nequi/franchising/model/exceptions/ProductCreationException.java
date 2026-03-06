@@ -1,7 +1,7 @@
 package co.com.nequi.franchising.model.exceptions;
 
-public class ProductCreationException extends RuntimeException {
+public class ProductCreationException extends BusinessException {
     public ProductCreationException(String message) {
-        super(message);
+        super(message, 400);
     }
 }
