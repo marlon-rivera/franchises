@@ -21,10 +21,27 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,prometheus"
+        include: "health,prometheus,circuitbreakers"
   endpoint:
     health:
       probes:
         enabled: true
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      franchiseDb:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true

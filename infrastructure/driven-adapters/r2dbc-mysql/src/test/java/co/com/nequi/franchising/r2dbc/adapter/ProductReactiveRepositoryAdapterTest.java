@@ -3,6 +3,7 @@ package co.com.nequi.franchising.r2dbc.adapter;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.r2dbc.data.ProductData;
 import co.com.nequi.franchising.r2dbc.repository.ProductReactiveRepository;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +28,7 @@ class ProductReactiveRepositoryAdapterTest {
     void setUp() {
         repository = mock(ProductReactiveRepository.class);
         mapper = mock(ObjectMapper.class);
-        adapter = new ProductReactiveRepositoryAdapter(repository, mapper);
+        adapter = new ProductReactiveRepositoryAdapter(repository, mapper, CircuitBreaker.ofDefaults("test"));
     }
 
     @Test
