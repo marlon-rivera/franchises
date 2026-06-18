@@ -1,0 +1,6 @@
+# Keep shell scripts with LF so the Docker build works on Linux/CodeBuild
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Windows batch scripts stay CRLF
+*.bat text eol=crlf

@@ -3,6 +3,7 @@ package co.com.nequi.franchising.r2dbc.adapter;
 import co.com.nequi.franchising.model.branch.Branch;
 import co.com.nequi.franchising.r2dbc.data.BranchData;
 import co.com.nequi.franchising.r2dbc.repository.BranchReactiveRepository;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ class BranchReactiveRepositoryAdapterTest {
     void setUp() {
         repository = org.mockito.Mockito.mock(BranchReactiveRepository.class);
         mapper = org.mockito.Mockito.mock(ObjectMapper.class);
-        adapter = new BranchReactiveRepositoryAdapter(repository, mapper);
+        adapter = new BranchReactiveRepositoryAdapter(repository, mapper, CircuitBreaker.ofDefaults("test"));
     }
 
     @Test

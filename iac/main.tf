@@ -15,9 +15,9 @@ terraform {
   # Backend remoto con S3 para proteger el state y habilitar locking
   # Crear previamente el bucket S3
   backend "s3" {
-    bucket       = "franchising-project-tfstate"
+    bucket       = "franchising-project-tfstate-nequi"
     key          = "terraform.tfstate"
-    region       = "us-east-1"
+    region       = "us-east-2"
     encrypt      = true
     use_lockfile = true
   }
@@ -25,6 +25,7 @@ terraform {
 
 provider "aws" {
   region = var.region
+  profile = var.profile
 }
 
 module "vpc" {

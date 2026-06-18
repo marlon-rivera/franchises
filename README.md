@@ -10,6 +10,7 @@ Este proyecto es una API REST desarrollada con **Spring WebFlux** bajo la arquit
 - Spring Boot 3.5.0 + WebFlux
 - R2DBC + MySQL 8
 - Flyway (migraciones con JDBC)
+- Resilience4j (Circuit Breaker)
 - Docker + Docker Compose
 - OpenAPI (Swagger UI)
 - Clean Architecture (Scaffold - Bancolombia)
@@ -163,6 +164,42 @@ Las variables están definidas en el archivo `.env` o el `docker-compose.yml`, y
 | `FLYWAY_URL`     | Cadena JDBC para migraciones Flyway      |
 | `USER_DATABASE`  | Usuario de la base de datos              |
 | `PASS_DATABASE`  | Contraseña del usuario de BD             |
+
+---
+
+## 🔌 Circuit Breaker (Resilience4j)
+
+Para proteger la API ante fallos de la base de datos, las operaciones de persistencia
+están envueltas en un **Circuit Breaker** implementado con **Resilience4j**.
+
+### ¿Cómo funciona?
+
+- Todas las llamadas reactivas de los adaptadores R2DBC pasan por `ReactiveAdapterOperations.withCircuitBreaker(...)`, que decora el `Mono`/`Flux` con `CircuitBreakerOperator`.
+- Cuando el breaker está **abierto**, las llamadas se rechazan con `CallNotPermittedException`, que se traduce a una excepción funcional `ServiceUnavailableException` (no se exponen detalles técnicos al cliente).
+- El estado del breaker se expone como health indicator vía Actuator.
+
+### Configuración (`application.yaml`)
+
+Instancia `franchiseDb`:
+
+| Propiedad                              | Valor      | Descripción                                      |
+|----------------------------------------|------------|--------------------------------------------------|
+| `sliding-window-type`                  | COUNT_BASED| Ventana basada en número de llamadas             |
+| `sliding-window-size`                  | 10         | Tamaño de la ventana                             |
+| `minimum-number-of-calls`              | 5          | Llamadas mínimas antes de calcular tasa de fallo |
+| `failure-rate-threshold`               | 50         | % de fallos para abrir el circuito               |
+| `wait-duration-in-open-state`          | 10s        | Tiempo en estado abierto antes de half-open      |
+| `permitted-number-of-calls-in-half-open-state` | 3  | Llamadas de prueba en half-open                  |
+| `automatic-transition-from-open-to-half-open-enabled` | true | Transición automática open → half-open    |
+
+### Monitoreo
+
+Estado del circuito vía Actuator:
+
+```
+http://localhost:8080/actuator/circuitbreakers
+http://localhost:8080/actuator/health
+```
 
 ---
 
