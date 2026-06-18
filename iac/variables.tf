@@ -1,7 +1,13 @@
 variable "region" {
   description = "AWS region"
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
+}
+
+variable "profile" {
+  description = "AWS CLI profile name"
+  type        = string
+  default     = "franchiseproject"
 }
 
 variable "vpc_cidr" {
@@ -31,7 +37,7 @@ variable "environment" {
 variable "availability_zones" {
     description = "List of availability zones to use"
     type        = list(string)
-    default     = ["us-east-1a", "us-east-1b"]
+    default     = ["us-east-2a", "us-east-2b"]
 }
 
 variable "ecr_repository_name" {
