@@ -1,10 +1,10 @@
 package co.com.nequi.franchising.api.exception;
 
-import co.com.nequi.franchising.model.exceptions.FranchiseCreationException;
-import co.com.nequi.franchising.utils.constants.FranchiseConstants;
+import co.com.nequi.franchising.model.exceptions.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Component
+@Order(-2)
 @RequiredArgsConstructor
 public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler {
 
@@ -22,14 +23,17 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        HttpStatus status;
         String message = ex.getMessage();
         String path = exchange.getRequest().getPath().toString();
 
-        if (ex instanceof FranchiseCreationException) {
-            status = HttpStatus.BAD_REQUEST;
-            message = ex.getMessage();
-            path = FranchiseConstants.ENDPOINT_CREATE_FRANCHISE;
+        if (ex instanceof BusinessException businessException) {
+            status = HttpStatus.resolve(businessException.getHttpStatus());
+            if (status == null) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
+        } else {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
         ExceptionResponse errorResponse = new ExceptionResponse(

@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,7 +90,7 @@ class BranchUseCaseTest {
         Branch existingBranch = Branch.builder().id(branchId).name("Old Name").franchiseId(1L).build();
 
         when(branchRepository.findById(branchId)).thenReturn(Mono.just(existingBranch));
-        when(branchRepository.save(existingBranch)).thenReturn(Mono.just(existingBranch.toBuilder().name(newName).build()));
+        when(branchRepository.save(any(Branch.class))).thenReturn(Mono.just(existingBranch.toBuilder().name(newName).build()));
 
         StepVerifier.create(branchUseCase.updateBranchName(branchId, newName))
                 .expectNextMatches(updatedBranch -> updatedBranch.getId().equals(branchId) && updatedBranch.getName().equals(newName))

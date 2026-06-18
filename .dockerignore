@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# Build outputs
+build/
+**/build/
+build-cache/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Terraform
+iac/
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Docker
+deployment/docker-compose.yml
+
+# Other
+.env
+m/
+*.hprof
+

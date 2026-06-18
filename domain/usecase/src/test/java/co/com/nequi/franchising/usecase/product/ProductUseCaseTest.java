@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -59,12 +58,10 @@ class ProductUseCaseTest {
         Integer quantity = 10;
         Long branchId = 1L;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.saveProduct(product, quantity, branchId)
-        );
-
-        assertEquals("The product name must not be null or empty.", exception.getMessage());
+        StepVerifier.create(productUseCase.saveProduct(product, quantity, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product name must not be null or empty."))
+                .verify();
     }
 
     @Test
@@ -73,12 +70,10 @@ class ProductUseCaseTest {
         Integer quantity = 10;
         Long branchId = 1L;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.saveProduct(product, quantity, branchId)
-        );
-
-        assertEquals("The product name must not be null or empty.", exception.getMessage());
+        StepVerifier.create(productUseCase.saveProduct(product, quantity, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product name must not be null or empty."))
+                .verify();
     }
 
     @Test
@@ -87,12 +82,10 @@ class ProductUseCaseTest {
         Integer quantity = 10;
         Long branchId = 1L;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.saveProduct(product, quantity, branchId)
-        );
-
-        assertEquals("The product name must not be null or empty.", exception.getMessage());
+        StepVerifier.create(productUseCase.saveProduct(product, quantity, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product name must not be null or empty."))
+                .verify();
     }
 
     @Test
@@ -101,12 +94,10 @@ class ProductUseCaseTest {
         Integer quantity = null;
         Long branchId = 1L;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.saveProduct(product, quantity, branchId)
-        );
-
-        assertEquals("The product quantity must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.saveProduct(product, quantity, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product quantity must not be null."))
+                .verify();
     }
 
     @Test
@@ -115,12 +106,10 @@ class ProductUseCaseTest {
         Integer quantity = -5;
         Long branchId = 1L;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.saveProduct(product, quantity, branchId)
-        );
-
-        assertEquals("The product quantity must be greater than zero.", exception.getMessage());
+        StepVerifier.create(productUseCase.saveProduct(product, quantity, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product quantity must be greater than zero."))
+                .verify();
     }
 
     @Test
@@ -129,12 +118,10 @@ class ProductUseCaseTest {
         Integer quantity = 10;
         Long branchId = null;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.saveProduct(product, quantity, branchId)
-        );
-
-        assertEquals("The product branch ID must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.saveProduct(product, quantity, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product branch ID must not be null."))
+                .verify();
     }
 
     @Test
@@ -169,12 +156,10 @@ class ProductUseCaseTest {
         Long productId = null;
         Long branchId = 1L;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.deleteProductFromBranch(productId, branchId)
-        );
-
-        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.deleteProductFromBranch(productId, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product ID or branch ID must not be null."))
+                .verify();
     }
 
     @Test
@@ -182,12 +167,10 @@ class ProductUseCaseTest {
         Long productId = 1L;
         Long branchId = null;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.deleteProductFromBranch(productId, branchId)
-        );
-
-        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.deleteProductFromBranch(productId, branchId))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product ID or branch ID must not be null."))
+                .verify();
     }
 
     @Test
@@ -213,12 +196,10 @@ class ProductUseCaseTest {
         Long branchId = 1L;
         Integer quantity = 20;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.updateStock(productId, branchId, quantity)
-        );
-
-        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.updateStock(productId, branchId, quantity))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product ID or branch ID must not be null."))
+                .verify();
     }
 
     @Test
@@ -227,12 +208,10 @@ class ProductUseCaseTest {
         Long branchId = null;
         Integer quantity = 20;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.updateStock(productId, branchId, quantity)
-        );
-
-        assertEquals("The product ID or branch ID must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.updateStock(productId, branchId, quantity))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product ID or branch ID must not be null."))
+                .verify();
     }
 
     @Test
@@ -241,12 +220,10 @@ class ProductUseCaseTest {
         Long branchId = 1L;
         Integer quantity = null;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.updateStock(productId, branchId, quantity)
-        );
-
-        assertEquals("The product quantity must not be null.", exception.getMessage());
+        StepVerifier.create(productUseCase.updateStock(productId, branchId, quantity))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product quantity must not be null."))
+                .verify();
     }
 
     @Test
@@ -255,12 +232,10 @@ class ProductUseCaseTest {
         Long branchId = 1L;
         Integer quantity = -5;
 
-        ProductCreationException exception = assertThrows(
-                ProductCreationException.class,
-                () -> productUseCase.updateStock(productId, branchId, quantity)
-        );
-
-        assertEquals("The product quantity must be greater than zero.", exception.getMessage());
+        StepVerifier.create(productUseCase.updateStock(productId, branchId, quantity))
+                .expectErrorMatches(throwable -> throwable instanceof ProductCreationException &&
+                        throwable.getMessage().equals("The product quantity must be greater than zero."))
+                .verify();
     }
 
     @Test

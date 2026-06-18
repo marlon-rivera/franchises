@@ -5,6 +5,7 @@ import co.com.nequi.franchising.model.product.gateways.ProductRepository;
 import co.com.nequi.franchising.r2dbc.data.ProductData;
 import co.com.nequi.franchising.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.nequi.franchising.r2dbc.repository.ProductReactiveRepository;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +18,8 @@ public class ProductReactiveRepositoryAdapter extends ReactiveAdapterOperations<
  implements ProductRepository{
 
 
-    public ProductReactiveRepositoryAdapter(ProductReactiveRepository repository, ObjectMapper mapper) {
-        super(repository, mapper, d -> mapper.map(d, Product.class));
+    public ProductReactiveRepositoryAdapter(ProductReactiveRepository repository, ObjectMapper mapper,
+                                            CircuitBreaker franchiseDbCircuitBreaker) {
+        super(repository, mapper, d -> mapper.map(d, Product.class), franchiseDbCircuitBreaker);
     }
 }

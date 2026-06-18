@@ -17,7 +17,7 @@ resource "aws_subnet" "public-subnet" {
   map_public_ip_on_launch = true
   availability_zone = var.availability_zones[count.index]
     tags = {
-        Name = "nequi-challenge-public-subnet"
+        Name = "nequi-challenge-public-subnet-${var.availability_zones[count.index]}"
         Environment = var.environment
     }
 }
@@ -29,7 +29,7 @@ resource "aws_subnet" "private-subnet" {
   cidr_block = var.private_subnet_cidrs[count.index]
   availability_zone = var.availability_zones[count.index]
     tags = {
-        Name = "nequi-challenge-private-subnet"
+        Name = "nequi-challenge-private-subnet-${var.availability_zones[count.index]}"
         Environment = var.environment
     }
 }
@@ -43,19 +43,24 @@ resource "aws_internet_gateway" "igw" {
     }
 }
 
-#Eip for NAT Gateway
+#Eip for NAT Gateway (one per AZ for HA)
 resource "aws_eip" "nat_eip" {
-  count = 1
+  count  = length(var.availability_zones)
   domain = "vpc"
+
+  tags = {
+    Name        = "nequi-challenge-nat-eip-${var.availability_zones[count.index]}"
+    Environment = var.environment
+  }
 }
 
-#NAT Gateway
+#NAT Gateway (one per AZ for HA)
 resource "aws_nat_gateway" "nat-gateway" {
-  count = 1
-  allocation_id = aws_eip.nat_eip[0].id
-  subnet_id     = aws_subnet.public-subnet[0].id
+  count         = length(var.availability_zones)
+  allocation_id = aws_eip.nat_eip[count.index].id
+  subnet_id     = aws_subnet.public-subnet[count.index].id
   tags = {
-    Name = "nequi-challenge-nat-gateway"
+    Name = "nequi-challenge-nat-gateway-${var.availability_zones[count.index]}"
     Environment = var.environment
   }
 }
@@ -76,20 +81,26 @@ resource "aws_route_table_association" "publicRTAssociation" {
   route_table_id = aws_route_table.publicRT.id
 }
 
-#Route Table for private subnet
+#Route Table for private subnet (one per AZ, each pointing to its own NAT GW)
 resource "aws_route_table" "privateRT" {
+  count  = length(var.availability_zones)
   vpc_id = aws_vpc.nequi-challenge-vpc.id
   route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat-gateway[0].id
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gateway[count.index].id
+  }
+
+  tags = {
+    Name        = "nequi-challenge-private-rt-${var.availability_zones[count.index]}"
+    Environment = var.environment
   }
 }
 
-#Associate private subnet with the private route table
+#Associate private subnet with its corresponding private route table
 resource "aws_route_table_association" "privateRTAssociation" {
-    count = length(aws_subnet.private-subnet)
+  count          = length(aws_subnet.private-subnet)
   subnet_id      = aws_subnet.private-subnet[count.index].id
-  route_table_id = aws_route_table.privateRT.id
+  route_table_id = aws_route_table.privateRT[count.index].id
 }
 
 #Security group for ALB

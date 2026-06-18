@@ -5,9 +5,9 @@ import co.com.nequi.franchising.model.franchise.gateways.FranchiseRepository;
 import co.com.nequi.franchising.r2dbc.data.FranchiseData;
 import co.com.nequi.franchising.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.nequi.franchising.r2dbc.repository.FranchiseReactiveRepository;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Mono;
 
 @Repository
 public class FranchiseReactiveRepositoryAdapter extends ReactiveAdapterOperations<
@@ -16,8 +16,9 @@ public class FranchiseReactiveRepositoryAdapter extends ReactiveAdapterOperation
     Long,
     FranchiseReactiveRepository
 > implements FranchiseRepository {
-    public FranchiseReactiveRepositoryAdapter(FranchiseReactiveRepository repository, ObjectMapper mapper) {
-        super(repository, mapper, d -> mapper.map(d, Franchise.class));
+    public FranchiseReactiveRepositoryAdapter(FranchiseReactiveRepository repository, ObjectMapper mapper,
+                                              CircuitBreaker franchiseDbCircuitBreaker) {
+        super(repository, mapper, d -> mapper.map(d, Franchise.class), franchiseDbCircuitBreaker);
     }
 
 }

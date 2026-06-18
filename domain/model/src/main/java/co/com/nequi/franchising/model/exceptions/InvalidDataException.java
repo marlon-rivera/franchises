@@ -1,7 +1,7 @@
 package co.com.nequi.franchising.model.exceptions;
 
-public class InvalidDataException extends RuntimeException {
+public class InvalidDataException extends BusinessException {
     public InvalidDataException(String message) {
-        super(message);
+        super(message, 400);
     }
 }

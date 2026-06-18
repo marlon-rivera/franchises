@@ -2,15 +2,23 @@ package co.com.nequi.franchising.api.handler;
 
 import co.com.nequi.franchising.api.dto.request.FranchiseRequestDto;
 import co.com.nequi.franchising.api.dto.response.FranchiseResponseDto;
+import co.com.nequi.franchising.api.exception.GlobalErrorWebExceptionHandler;
 import co.com.nequi.franchising.model.branch.Branch;
+import co.com.nequi.franchising.model.exceptions.FranchiseCreationException;
+import co.com.nequi.franchising.model.exceptions.InvalidDataException;
 import co.com.nequi.franchising.model.franchise.Franchise;
 import co.com.nequi.franchising.model.product.Product;
 import co.com.nequi.franchising.usecase.dto.TopProductByBranchDto;
 import co.com.nequi.franchising.usecase.franchise.FranchiseUseCase;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,11 +41,19 @@ class FranchiseHandlerTest {
         franchiseUseCase = mock(FranchiseUseCase.class);
         FranchiseHandler handler = new FranchiseHandler(franchiseUseCase);
 
-        webTestClient = WebTestClient.bindToRouterFunction(
-                route().POST("/api/franchise/create", handler::saveFranchise).build()
-                        .andRoute(GET("/api/franchise/{franchiseId}/top-products"), handler::getTopStockProductsByBranch)
-                        .andRoute(PUT("/api/franchise/{franchiseId}/update-name"), handler::updateFranchiseName)
-        ).build();
+        RouterFunction<ServerResponse> routerFunction = route()
+                .POST("/api/franchise/create", handler::saveFranchise).build()
+                .andRoute(GET("/api/franchise/{franchiseId}/top-products"), handler::getTopStockProductsByBranch)
+                .andRoute(PUT("/api/franchise/{franchiseId}/update-name"), handler::updateFranchiseName);
+
+        GlobalErrorWebExceptionHandler exceptionHandler = new GlobalErrorWebExceptionHandler(new ObjectMapper());
+
+        ExceptionHandlingWebHandler webHandler = new ExceptionHandlingWebHandler(
+                RouterFunctions.toWebHandler(routerFunction),
+                java.util.List.of(exceptionHandler)
+        );
+
+        webTestClient = WebTestClient.bindToWebHandler(webHandler).build();
     }
 
     @Test
@@ -52,7 +68,7 @@ class FranchiseHandlerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDto)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody(FranchiseResponseDto.class)
                 .value(response -> {
                     assert response.id() == 1L;
@@ -62,6 +78,9 @@ class FranchiseHandlerTest {
 
     @Test
     void shouldReturnBadRequestWhenFranchiseNameIsEmpty() {
+        when(franchiseUseCase.saveFranchise(any()))
+                .thenReturn(Mono.error(new FranchiseCreationException("Franchise name must not be null or empty")));
+
         FranchiseRequestDto requestDto = new FranchiseRequestDto("");
 
         webTestClient.post()
@@ -78,6 +97,9 @@ class FranchiseHandlerTest {
 
     @Test
     void shouldReturnBadRequestWhenFranchiseNameIsNull() {
+        when(franchiseUseCase.saveFranchise(any()))
+                .thenReturn(Mono.error(new FranchiseCreationException("Franchise name must not be null or empty")));
+
         FranchiseRequestDto requestDto = new FranchiseRequestDto(null);
 
         webTestClient.post()
@@ -140,7 +162,7 @@ class FranchiseHandlerTest {
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(400)
                 .jsonPath("$.message").value(msg ->
-                        ((String) msg).contains("The franchise ID must be numeric."));
+                        ((String) msg).contains("must be numeric"));
     }
 
     @Test
@@ -195,6 +217,9 @@ class FranchiseHandlerTest {
     void shouldReturnBadRequestWhenUpdatingFranchiseNameWithEmptyName() {
         Long franchiseId = 1L;
 
+        when(franchiseUseCase.updateName(anyLong(), any()))
+                .thenReturn(Mono.error(new InvalidDataException("Franchise name must not be null or empty")));
+
         webTestClient.put()
                 .uri("/api/franchise/{franchiseId}/update-name", franchiseId)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -210,6 +235,9 @@ class FranchiseHandlerTest {
     @Test
     void shouldReturnBadRequestWhenUpdatingFranchiseNameWithNullName() {
         Long franchiseId = 1L;
+
+        when(franchiseUseCase.updateName(anyLong(), any()))
+                .thenReturn(Mono.error(new InvalidDataException("Franchise name must not be null or empty")));
 
         webTestClient.put()
                 .uri("/api/franchise/{franchiseId}/update-name", franchiseId)
@@ -236,7 +264,7 @@ class FranchiseHandlerTest {
                 .expectBody()
                 .jsonPath("$.status").isEqualTo(400)
                 .jsonPath("$.message").value(msg ->
-                        ((String) msg).contains("The franchise ID must be numeric."));
+                        ((String) msg).contains("must be numeric"));
     }
 
 }

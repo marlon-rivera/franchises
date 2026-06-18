@@ -302,10 +302,6 @@ resource "aws_api_gateway_method" "update_product_stock" {
   resource_id   = aws_api_gateway_resource.update_product_stock_stock.id
   http_method   = "PUT"
   authorization = "NONE"
-    request_parameters = {
-        "method.request.path.productId" = true
-        "method.request.path.branchId" = true
-    }
 }
 
 resource "aws_api_gateway_integration" "update_product_stock" {
@@ -316,10 +312,6 @@ resource "aws_api_gateway_integration" "update_product_stock" {
   type                    = "HTTP_PROXY"
   uri                     = "http://${var.alb_dns}/api/product/update/stock"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  request_parameters = {
-    "integration.request.path.productId" = "method.request.path.productId"
-    "integration.request.path.branchId" = "method.request.path.branchId"
-  }
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
